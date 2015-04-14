@@ -6,3 +6,7 @@ log
 debian/metricsd
 debian/metricsd.debhelper.log
 metricsd.jar
+
+# IntelliJ
+.idea
+*.iml
