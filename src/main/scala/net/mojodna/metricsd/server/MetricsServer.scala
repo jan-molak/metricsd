@@ -1,15 +1,16 @@
 package net.mojodna.metricsd.server
 
-import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
-import java.util.concurrent.Executors
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap
-import org.jboss.netty.util.CharsetUtil
-import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
-import org.jboss.netty.channel.{FixedReceiveBufferSizePredictorFactory, Channels, ChannelPipeline, ChannelPipelineFactory}
-import com.codahale.logula.Logging
 import java.net.InetSocketAddress
+import java.util.concurrent.Executors
 
-class MetricsServer(port: Int, prefix: String) extends Logging {
+import com.typesafe.scalalogging.LazyLogging
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap
+import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
+import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory, Channels, FixedReceiveBufferSizePredictorFactory}
+import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
+import org.jboss.netty.util.CharsetUtil
+
+class MetricsServer(port: Int, prefix: String) extends LazyLogging {
   def listen = {
     val f = new NioDatagramChannelFactory(Executors.newCachedThreadPool)
 
@@ -30,11 +31,7 @@ class MetricsServer(port: Int, prefix: String) extends Logging {
 
     b.setOption("receiveBufferSizePredictorFactory", new FixedReceiveBufferSizePredictorFactory(1024))
 
-    log.info("Listening on port %d.", port)
+    logger.info(s"Listening on port $port.")
     b.bind(new InetSocketAddress(port))
   }
-}
-
-object MetricsServer {
-  val DEFAULT_PORT = 8125
 }
