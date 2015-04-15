@@ -1,13 +1,13 @@
 package net.mojodna.metricsd.server
 
-import com.codahale.logula.Logging
+import com.typesafe.scalalogging.LazyLogging
 import com.yammer.metrics.Metrics
-import org.jboss.netty.channel.{ExceptionEvent, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 
 import scala.collection.JavaConversions._
 
 class ManagementServiceHandler
-  extends SimpleChannelUpstreamHandler with Logging {
+  extends SimpleChannelUpstreamHandler with LazyLogging {
 
   val HELP = "help"
   val COUNTERS = "counters"
@@ -19,7 +19,7 @@ class ManagementServiceHandler
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val msg = e.getMessage.asInstanceOf[String]
 
-    log.trace("Received message: %s", msg)
+    logger.trace(s"Received message: $msg")
 
     msg match {
       case HELP =>
@@ -39,12 +39,12 @@ class ManagementServiceHandler
       case QUIT =>
         e.getChannel.close
       case x: String =>
-        log.error("Unknown command: %s", x)
+        logger.error("Unknown command: %s", x)
         e.getChannel.write("Unknown command\n")
     }
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    log.error(e.getCause, "Exception in ManagementServiceHandler", e)
+    logger.error("Exception in ManagementServiceHandler", e)
   }
 }

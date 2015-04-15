@@ -1,18 +1,20 @@
 package net.mojodna.metricsd.server
 
-import scala.math.round
-import com.codahale.logula.Logging
-import org.jboss.netty.channel.{ExceptionEvent, MessageEvent, ChannelHandlerContext, SimpleChannelUpstreamHandler}
-import com.yammer.metrics.core.MetricName
 import java.util.concurrent.TimeUnit
+
+import com.typesafe.scalalogging.LazyLogging
 import com.yammer.metrics.Metrics
-import util.matching.Regex
+import com.yammer.metrics.core.MetricName
+import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
+
+import scala.math.round
+import scala.util.matching.Regex
 
 /**
  * A service handler for :-delimited metrics strings (à la Etsy's statsd).
  */
 class MetricsServiceHandler(prefix: String)
-  extends SimpleChannelUpstreamHandler with Logging {
+  extends SimpleChannelUpstreamHandler with LazyLogging {
 
   val COUNTER_METRIC_TYPE = "c"
   val GAUGE_METRIC_TYPE = "g"
@@ -26,7 +28,7 @@ class MetricsServiceHandler(prefix: String)
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val msg = e.getMessage.asInstanceOf[String]
 
-    log.trace("Received message: %s", msg)
+    logger.trace(s"Received message: $msg")
 
     msg.trim.split("\n").foreach {
       line: String =>
@@ -73,36 +75,36 @@ class MetricsServiceHandler(prefix: String)
               new MetricName("metrics", "meter", metricName)
           }
 
-          log.debug("Deleting metric '%s'", name)
+          logger.debug(s"Deleting metric '$name'")
           Metrics.defaultRegistry.removeMetric(name)
         } else {
           metricType match {
             case COUNTER_METRIC_TYPE =>
-              log.debug("Incrementing counter '%s' with %d at sample rate %f (%d)", metricName, value, sampleRate, round(value * 1 / sampleRate))
+              logger.debug(s"Incrementing counter '$metricName' with $value at sample rate $sampleRate (${ round(value * 1 / sampleRate) })")
               Metrics.newCounter(new MetricName("metrics", "counter", metricName)).inc(round(value * 1 / sampleRate))
 
             case GAUGE_METRIC_TYPE =>
-              log.debug("Updating gauge '%s' with %d", metricName, value)
+              logger.debug(s"Updating gauge '$metricName' with $value")
               // use a counter to simulate a gauge
               val counter = Metrics.newCounter(new MetricName("metrics", "gauge", metricName))
               counter.clear()
               counter.inc(value)
 
             case HISTOGRAM_METRIC_TYPE | TIMER_METRIC_TYPE =>
-              log.debug("Updating histogram '%s' with %d", metricName, value)
+              logger.debug(s"Updating histogram '$metricName' with $value")
               // note: assumes that values have been normalized to integers
               Metrics.newHistogram(new MetricName("metrics", "histogram", metricName), true).update(value)
 
             case METER_METRIC_TYPE =>
-              log.debug("Marking meter '%s'", metricName)
+              logger.debug(s"Marking meter '$metricName'")
               Metrics.newMeter(new MetricName("metrics", "meter", metricName), "samples", TimeUnit.SECONDS).mark()
 
             case METER_VALUE_METRIC_TYPE =>
-              log.debug("Marking meter '%s' with %d", metricName, value)
+              logger.debug(s"Marking meter '$metricName' with $value")
               Metrics.newMeter(new MetricName("metrics", "meter", metricName), "samples", TimeUnit.SECONDS).mark(value)
 
             case x: String =>
-              log.error("Unknown metric type: %s", x)
+              logger.error(s"Unknown metric type: $x")
           }
 
           Metrics.newMeter(new MetricName(prefix, "meter", "samples"), "samples", TimeUnit.SECONDS).mark()
@@ -111,6 +113,6 @@ class MetricsServiceHandler(prefix: String)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    log.error(e.getCause, "Exception in MetricsServiceHandler", e)
+    logger.error("Exception in MetricsServiceHandler", e)
   }
 }

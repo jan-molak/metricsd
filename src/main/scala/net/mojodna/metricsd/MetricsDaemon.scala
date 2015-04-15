@@ -2,23 +2,23 @@ package net.mojodna.metricsd
 
 import java.util.concurrent.TimeUnit
 
-import com.codahale.logula.Logging
-import com.typesafe.config.{ConfigException, Config, ConfigFactory}
+import com.typesafe.config.{Config, ConfigException, ConfigFactory}
+import com.typesafe.scalalogging.LazyLogging
 import com.yammer.metrics.reporting.{ConsoleReporter, GraphiteReporter}
 import net.mojodna.metricsd.server.{ManagementServer, MetricsServer}
-import org.apache.log4j.Level
 
-class MetricsDaemon(config: Config) extends Logging {
+class MetricsDaemon(config: Config) extends LazyLogging {
   def apply() = {
 
     if (config.getBoolean("debug")) {
+      logger.info("Console Reporter enabled (debugging mode)")
       ConsoleReporter.enable(10, TimeUnit.SECONDS)
     }
 
     val flushInterval = config.getInt("graphite.flushInterval")
     val graphiteHost = config.getString("graphite.host")
     val graphitePort = config.getInt("graphite.port")
-    log.info("Flushing to %s:%d every %ds", graphiteHost, graphitePort, flushInterval)
+    logger.info(s"Flushing to graphite at $graphiteHost:$graphitePort every $flushInterval seconds")
 
     GraphiteReporter.enable(
       flushInterval,
@@ -41,25 +41,12 @@ class MetricsDaemon(config: Config) extends Logging {
   }
 }
 
-object MetricsDaemon extends App {
+object MetricsDaemon extends App with LazyLogging {
   try {
     val config = ConfigFactory.load()
 
-    Logging.configure {
-      log =>
-        log.registerWithJMX = true
-
-        log.level = Level.toLevel(config.getString("log.level"))
-
-        log.file.enabled = true
-        log.file.filename = config.getString("log.file")
-        log.file.maxSize = 10 * 1024
-        log.file.retainedFiles = 5
-    }
-
     new MetricsDaemon(config)()
-
   } catch {
-    case e: ConfigException => println(e.getMessage)
+    case e: ConfigException => logger.error(s"Problem with configuration: ${e.getMessage}")
   }
 }
