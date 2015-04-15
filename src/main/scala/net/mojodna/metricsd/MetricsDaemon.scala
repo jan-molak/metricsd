@@ -1,21 +1,23 @@
 package net.mojodna.metricsd
 
-import com.codahale.logula.Logging
-import com.codahale.fig.Configuration
-import org.apache.log4j.Level
 import java.util.concurrent.TimeUnit
-import com.yammer.metrics.reporting.{GraphiteReporter, ConsoleReporter}
-import net.mojodna.metricsd.server.{MetricsServer, ManagementServer}
 
-class MetricsDaemon(config: Configuration) extends Logging {
+import com.codahale.logula.Logging
+import com.typesafe.config.{ConfigException, Config, ConfigFactory}
+import com.yammer.metrics.reporting.{ConsoleReporter, GraphiteReporter}
+import net.mojodna.metricsd.server.{ManagementServer, MetricsServer}
+import org.apache.log4j.Level
+
+class MetricsDaemon(config: Config) extends Logging {
   def apply() = {
-    if (config("debug").or(false)) {
+
+    if (config.getBoolean("debug")) {
       ConsoleReporter.enable(10, TimeUnit.SECONDS)
     }
 
-    val flushInterval = config("graphite.flushInterval").or(10)
-    val graphiteHost = config("graphite.host").or("localhost")
-    val graphitePort = config("graphite.port").or(2003)
+    val flushInterval = config.getInt("graphite.flushInterval")
+    val graphiteHost = config.getString("graphite.host")
+    val graphitePort = config.getInt("graphite.port")
     log.info("Flushing to %s:%d every %ds", graphiteHost, graphitePort, flushInterval)
 
     GraphiteReporter.enable(
@@ -29,39 +31,35 @@ class MetricsDaemon(config: Configuration) extends Logging {
     // restarts
 
     new MetricsServer(
-      config("port").or(MetricsServer.DEFAULT_PORT),
-      config("prefix").or("metricsd")
+      config.getInt("port"),
+      config.getString("prefix")
     ).listen
 
     new ManagementServer(
-      config("managementPort").or(config("management_port").or(ManagementServer.DEFAULT_PORT))
+      config.getInt("managementPort")
     ).listen
   }
 }
 
-object MetricsDaemon {
-  def main(args: Array[String]): Unit = {
-    val configFile = Option(System.getenv.get("CONFIG"))
-
-    val config = if (configFile == None) {
-      System.err.println("Set CONFIG=/path/to/config.json to use custom settings.")
-      new Configuration(scala.io.Source.fromString("{}"))
-    } else {
-      new Configuration(configFile.get)
-    }
+object MetricsDaemon extends App {
+  try {
+    val config = ConfigFactory.load()
 
     Logging.configure {
       log =>
         log.registerWithJMX = true
 
-        log.level = Level.toLevel(config("log.level").or("INFO"))
+        log.level = Level.toLevel(config.getString("log.level"))
 
         log.file.enabled = true
-        log.file.filename = config("log.file").or("log/metricsd.log")
+        log.file.filename = config.getString("log.file")
         log.file.maxSize = 10 * 1024
         log.file.retainedFiles = 5
     }
 
     new MetricsDaemon(config)()
+
+  } catch {
+    case e: ConfigException => println(e.getMessage)
   }
 }

@@ -1,4 +1,3 @@
-// these are the default values; feel free to remove/change
 {
     "debug": false,
     "graphite": {
