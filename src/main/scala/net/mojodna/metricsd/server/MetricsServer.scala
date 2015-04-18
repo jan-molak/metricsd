@@ -3,6 +3,7 @@ package net.mojodna.metricsd.server
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
+import com.codahale.metrics.MetricRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap
 import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
@@ -10,7 +11,7 @@ import org.jboss.netty.channel.{ChannelPipeline, ChannelPipelineFactory, Channel
 import org.jboss.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import org.jboss.netty.util.CharsetUtil
 
-class MetricsServer(port: Int, prefix: String) extends LazyLogging {
+class MetricsServer(metrics: MetricRegistry, port: Int) extends LazyLogging {
   def listen = {
     val f = new NioDatagramChannelFactory(Executors.newCachedThreadPool)
 
@@ -22,7 +23,7 @@ class MetricsServer(port: Int, prefix: String) extends LazyLogging {
         Channels.pipeline(
           new StringEncoder(CharsetUtil.UTF_8),
           new StringDecoder(CharsetUtil.UTF_8),
-          new MetricsServiceHandler(prefix)
+          new MetricsServiceHandler(metrics)
         )
       }
     })

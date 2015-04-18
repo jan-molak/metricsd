@@ -1,51 +1,74 @@
 package net.mojodna.metricsd
 
-import java.util.concurrent.TimeUnit
+import java.net.InetSocketAddress
 
+import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
+import com.codahale.metrics.{ConsoleReporter, MetricFilter, MetricRegistry, ScheduledReporter}
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
-import com.yammer.metrics.reporting.{ConsoleReporter, GraphiteReporter}
 import net.mojodna.metricsd.server.{ManagementServer, MetricsServer}
 
+
 class MetricsDaemon(config: Config) extends LazyLogging {
-  def apply() = {
+  import java.util.concurrent.TimeUnit._
 
-    if (config.getBoolean("debug")) {
-      logger.info("Console Reporter enabled (debugging mode)")
-      ConsoleReporter.enable(10, TimeUnit.SECONDS)
-    }
+  private val metrics  = new MetricRegistry()
 
+  // TODO bootstrap with counter metrics to avoid resets when the service restarts
+  // ^- not sure what that means; maybe just flush the metrics on shutdown?
+  private val metricsServer    = new MetricsServer(metrics, config.getInt("port"))
+  private val managementServer = new ManagementServer(metrics, config.getInt("managementPort"))
+
+  private val reporters = graphiteReporter :: ifDebug(consoleReporter)
+
+  def start: Unit = {
     val flushInterval = config.getInt("graphite.flushInterval")
-    val graphiteHost = config.getString("graphite.host")
-    val graphitePort = config.getInt("graphite.port")
-    logger.info(s"Flushing to graphite at $graphiteHost:$graphitePort every $flushInterval seconds")
+    logger.info(s"Flushing metrics every $flushInterval seconds")
 
-    GraphiteReporter.enable(
-      flushInterval,
-      TimeUnit.SECONDS,
-      graphiteHost,
-      graphitePort
-    )
+    metricsServer.listen
+    managementServer.listen
 
-    // TODO bootstrap with counter metrics to avoid resets when the service
-    // restarts
-
-    new MetricsServer(
-      config.getInt("port"),
-      config.getString("prefix")
-    ).listen
-
-    new ManagementServer(
-      config.getInt("managementPort")
-    ).listen
+    reporters.foreach( r => r.start(flushInterval, SECONDS) )
   }
+
+  // -- private
+
+  private def graphiteReporter: ScheduledReporter = {
+    val host   = config.getString("graphite.host")
+    val port   = config.getInt("graphite.port")
+    val prefix = config.getString("prefix")
+
+    logger.info(s"Reporting to graphite at $host:$port with prefix '$prefix' - enabled")
+
+    val graphite = new Graphite(new InetSocketAddress(host, port))
+
+    GraphiteReporter.forRegistry(metrics)
+      .prefixedWith(prefix)
+      .convertRatesTo(SECONDS)
+      .convertDurationsTo(MILLISECONDS)
+      .filter(MetricFilter.ALL)
+      .build(graphite)
+  }
+
+  private def consoleReporter: ScheduledReporter = {
+    logger.info("Reporting to console - enabled")
+
+    ConsoleReporter.forRegistry(metrics)
+      .convertRatesTo(SECONDS)
+      .convertDurationsTo(MILLISECONDS)
+      .build()
+  }
+
+  private def ifDebug[T](x: => T): List[T] = if (config.getBoolean("debug")) List(x) else Nil
 }
 
 object MetricsDaemon extends App with LazyLogging {
   try {
     val config = ConfigFactory.load()
 
-    new MetricsDaemon(config)()
+    new MetricsDaemon(config).start
+
+    // todo: flush metrics on shutdown
   } catch {
     case e: ConfigException => logger.error(s"Problem with configuration: ${e.getMessage}")
   }

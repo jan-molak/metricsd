@@ -1,18 +1,19 @@
 package net.mojodna.metricsd.server
 
+import com.codahale.metrics.MetricRegistry
 import com.typesafe.scalalogging.LazyLogging
-import com.yammer.metrics.Metrics
 import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 
 import scala.collection.JavaConversions._
 
-class ManagementServiceHandler
+class ManagementServiceHandler(metrics: MetricRegistry)
   extends SimpleChannelUpstreamHandler with LazyLogging {
 
   val HELP = "help"
   val COUNTERS = "counters"
   val GAUGES = "gauges"
   val HISTOGRAMS = "histograms"
+  val TIMERS = "timers"
   val METERS = "meters"
   val QUIT = "quit"
 
@@ -23,18 +24,21 @@ class ManagementServiceHandler
 
     msg match {
       case HELP =>
-        e.getChannel.write("COMMANDS: counters, gauges, histograms, meters, quit\n\n")
+        e.getChannel.write("COMMANDS: counters, gauges, histograms, timers, meters, quit\n\n")
       case COUNTERS =>
-        for((metricName, metric) <- Metrics.defaultRegistry.allMetrics if metricName.getType == "counter") e.getChannel.write(metricName.getName + "\n")
+        for((metricName, metric) <- metrics.getCounters if ! metricName.startsWith("metrics.gauges")) e.getChannel.write(metricName + "\n")
         e.getChannel.write("END\n\n")
       case GAUGES =>
-        for((metricName, metric) <- Metrics.defaultRegistry.allMetrics if metricName.getType == "gauge") e.getChannel.write(metricName.getName + "\n")
+        for((metricName, metric) <- metrics.getCounters if metricName.startsWith("metrics.gauges")) e.getChannel.write(metricName + "\n")
         e.getChannel.write("END\n\n")
       case HISTOGRAMS =>
-        for((metricName, metric) <- Metrics.defaultRegistry.allMetrics if metricName.getType == "histogram") e.getChannel.write(metricName.getName + "\n")
+        for((metricName, metric) <- metrics.getHistograms) e.getChannel.write(metricName + "\n")
+        e.getChannel.write("END\n\n")
+      case TIMERS =>
+        for((metricName, metric) <- metrics.getTimers) e.getChannel.write(metricName + "\n")
         e.getChannel.write("END\n\n")
       case METERS =>
-        for((metricName, metric) <- Metrics.defaultRegistry.allMetrics if metricName.getType == "meter") e.getChannel.write(metricName.getName + "\n")
+        for((metricName, metric) <- metrics.getMeters) e.getChannel.write(metricName + "\n")
         e.getChannel.write("END\n\n")
       case QUIT =>
         e.getChannel.close

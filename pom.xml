@@ -4,12 +4,14 @@
 
     <groupId>net.mojodna</groupId>
     <artifactId>metricsd</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.7.0-SNAPSHOT</version>
     <name>metricsd</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <metrics.version>3.1.1</metrics.version>
     </properties>
 
     <developers>
@@ -20,7 +22,7 @@
     </developers>
 
     <repositories>
-        <repository>
+        <repository><!-- todo: remove; no longer needed as all deps are on maven central -->
             <id>repo.codahale.com</id>
             <url>http://repo.codahale.com</url>
         </repository>
@@ -32,20 +34,21 @@
             <artifactId>scala-library</artifactId>
             <version>2.11.6</version>
         </dependency>
-        <dependency>
-            <groupId>com.yammer.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.yammer.metrics</groupId>
-            <artifactId>metrics-graphite</artifactId>
-            <version>2.2.0</version>
-        </dependency>
-        <dependency>
+        <dependency><!-- todo: replace with Akka IO -->
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>3.6.2.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>${metrics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-graphite</artifactId>
+            <version>${metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
