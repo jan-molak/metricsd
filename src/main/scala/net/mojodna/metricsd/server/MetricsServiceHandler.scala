@@ -132,9 +132,9 @@ class MetricsServiceHandler(metrics: MetricRegistry)
 
   private def full(metricName: String)(implicit metricType: String): String = metricType match {
     case COUNTER_METRIC_TYPE    => name(metricName)
-    case GAUGE_METRIC_TYPE      => name("gauges", metricName)
-    case HISTOGRAM_METRIC_TYPE  => name("histograms", metricName)
-    case TIMER_METRIC_TYPE      => name("timers", metricName)
+    case GAUGE_METRIC_TYPE      => name("gauge", metricName)
+    case HISTOGRAM_METRIC_TYPE  => name("histogram", metricName)
+    case TIMER_METRIC_TYPE      => name("timer", metricName)
     case METER_METRIC_TYPE      => name("meter", metricName)
   }
 
