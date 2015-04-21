@@ -131,11 +131,11 @@ class MetricsServiceHandler(metrics: MetricRegistry)
   private def by[T](what: T):T = what
 
   private def full(metricName: String)(implicit metricType: String): String = metricType match {
-    case COUNTER_METRIC_TYPE    => name("metrics", metricName)
-    case GAUGE_METRIC_TYPE      => name("metrics", "gauges", metricName)
-    case HISTOGRAM_METRIC_TYPE  => name("metrics", "histograms", metricName)
-    case TIMER_METRIC_TYPE      => name("metrics", "timers", metricName)
-    case METER_METRIC_TYPE      => name("metrics", "meter", metricName)
+    case COUNTER_METRIC_TYPE    => name(metricName)
+    case GAUGE_METRIC_TYPE      => name("gauges", metricName)
+    case HISTOGRAM_METRIC_TYPE  => name("histograms", metricName)
+    case TIMER_METRIC_TYPE      => name("timers", metricName)
+    case METER_METRIC_TYPE      => name("meter", metricName)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
