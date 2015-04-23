@@ -3,7 +3,7 @@ package net.mojodna.metricsd.server
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
-import com.codahale.metrics.MetricRegistry
+import com.smartcodeltd.metrics.MetricRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap
 import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
