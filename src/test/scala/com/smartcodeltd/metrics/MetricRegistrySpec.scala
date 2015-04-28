@@ -9,6 +9,6 @@ import org.scalatest._
 class MetricRegistrySpec extends FlatSpec with Matchers {
 
   "An empty Set" should "have size 0" in {
-    assert(Set.empty.size == 1)
+    assert(Set.empty.size == 0)
   }
 }
