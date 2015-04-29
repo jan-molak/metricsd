@@ -1,49 +1,24 @@
 package com.smartcodeltd.metrics;
 
+import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.codahale.metrics.*;
-import com.codahale.metrics.Timer;
-
-// As MetricRegistry can't be easily sub-classed or decorated we get this "lovely" copy'n'paste inheritance here.
-public class MetricRegistry extends com.codahale.metrics.MetricRegistry {
+public class TimestampingMetricRegistry extends MetricRegistry {
     private final Timestamp timestamp;
-
-    public static String name(String name, String... names) {
-        final StringBuilder builder = new StringBuilder();
-        append(builder, name);
-        if (names != null) {
-            for (String s : names) {
-                append(builder, s);
-            }
-        }
-        return builder.toString();
-    }
-
-    public static String name(Class<?> klass, String... names) {
-        return name(klass.getName(), names);
-    }
-
-    private static void append(StringBuilder builder, String part) {
-        if (part != null && !part.isEmpty()) {
-            if (builder.length() > 0) {
-                builder.append('.');
-            }
-            builder.append(part);
-        }
-    }
 
     private final ConcurrentMap<String, TimestampedMetric> metrics;
     private final List<MetricRegistryListener> listeners;
 
-    public MetricRegistry() {
+    public TimestampingMetricRegistry() {
         this(new Timestamp());
     }
 
-    public MetricRegistry(Timestamp timestamp) {
+    public TimestampingMetricRegistry(Timestamp timestamp) {
         this.metrics   = new ConcurrentHashMap<String, TimestampedMetric>();
         this.listeners = new CopyOnWriteArrayList<MetricRegistryListener>();
         this.timestamp = timestamp;

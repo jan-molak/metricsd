@@ -1,6 +1,6 @@
 package net.mojodna.metricsd.server
 
-import com.smartcodeltd.metrics.MetricRegistry
+import com.codahale.metrics.MetricRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 

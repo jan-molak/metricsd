@@ -2,7 +2,7 @@ package net.mojodna.metricsd.server
 
 import java.util.concurrent.TimeUnit
 
-import com.smartcodeltd.metrics.MetricRegistry
+import com.codahale.metrics.MetricRegistry
 import com.typesafe.scalalogging.LazyLogging
 import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, MessageEvent, SimpleChannelUpstreamHandler}
 
@@ -96,7 +96,13 @@ class MetricsServiceHandler(metrics: MetricRegistry)
             case GAUGE_METRIC_TYPE =>
               // todo: add support for gauge deltas:    <gauge_name>:[+-]<value>|g
               logger.debug(s"Updating gauge '${ full(metricName) }' with $value")
-              metrics.gauge(full(metricName)).set(value);
+
+              val counter = metrics.counter(full(metricName))
+              counter.dec(counter.getCount)
+              counter.inc(value)
+
+              // metrics.gauge(full(metricName)).set(value);
+
 
             case HISTOGRAM_METRIC_TYPE =>
 

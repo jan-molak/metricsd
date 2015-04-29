@@ -2,7 +2,8 @@ package net.mojodna.metricsd
 
 import java.net.InetSocketAddress
 
-import com.smartcodeltd.metrics.MetricRegistry
+import com.codahale.metrics.MetricRegistry
+import com.smartcodeltd.metrics.{TimestampingMetricRegistry, TimestampedMetric}
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import net.mojodna.metricsd.server.{ManagementServer, MetricsServer, Reporters}
@@ -11,8 +12,8 @@ import net.mojodna.metricsd.server.{ManagementServer, MetricsServer, Reporters}
 class MetricsDaemon(config: Config) extends LazyLogging with Reporters {
   import java.util.concurrent.TimeUnit._
 
-  implicit private val metrics = new MetricRegistry()
-  implicit private val attentionSpan = config.getLong("graphite.flushInterval")
+  implicit private val metrics: MetricRegistry = new TimestampingMetricRegistry()
+  implicit private val memorySpan = config.getLong("graphite.flushInterval")
 
   private val metricsServer    = new MetricsServer(metrics, config.getInt("port"))
 
