@@ -1,4 +1,4 @@
-package com.smartcodeltd.metrics;
+package com.smartcodeltd.statsd;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
@@ -47,7 +47,7 @@ public class TimestampingMetricRegistry extends MetricRegistry {
         return getOrAdd(name, MetricBuilder.COUNTERS);
     }
 
-    public com.smartcodeltd.metrics.timestamped.Gauge gauge(String name) {
+    public com.smartcodeltd.statsd.timestamped.Gauge gauge(String name) {
         return getOrAdd(name, MetricBuilder.GAUGES);
     }
 
@@ -226,34 +226,34 @@ public class TimestampingMetricRegistry extends MetricRegistry {
     }
 
     private interface MetricBuilder<T extends TimestampedMetric> {
-        MetricBuilder<com.smartcodeltd.metrics.timestamped.Counter> COUNTERS = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Counter>() {
+        MetricBuilder<com.smartcodeltd.statsd.timestamped.Counter> COUNTERS = new MetricBuilder<com.smartcodeltd.statsd.timestamped.Counter>() {
             @Override
-            public com.smartcodeltd.metrics.timestamped.Counter newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Counter(timestamp);
+            public com.smartcodeltd.statsd.timestamped.Counter newMetric(Timestamp timestamp) {
+                return new com.smartcodeltd.statsd.timestamped.Counter(timestamp);
             }
 
             @Override
             public boolean isInstance(Metric metric) {
-                return com.smartcodeltd.metrics.timestamped.Counter.class.isInstance(metric);
+                return com.smartcodeltd.statsd.timestamped.Counter.class.isInstance(metric);
             }
         };
 
-        MetricBuilder<com.smartcodeltd.metrics.timestamped.Gauge> GAUGES = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Gauge>() {
+        MetricBuilder<com.smartcodeltd.statsd.timestamped.Gauge> GAUGES = new MetricBuilder<com.smartcodeltd.statsd.timestamped.Gauge>() {
             @Override
-            public com.smartcodeltd.metrics.timestamped.Gauge newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Gauge(timestamp);
+            public com.smartcodeltd.statsd.timestamped.Gauge newMetric(Timestamp timestamp) {
+                return new com.smartcodeltd.statsd.timestamped.Gauge(timestamp);
             }
 
             @Override
             public boolean isInstance(Metric metric) {
-                return com.smartcodeltd.metrics.timestamped.Gauge.class.isInstance(metric);
+                return com.smartcodeltd.statsd.timestamped.Gauge.class.isInstance(metric);
             }
         };
 
-        MetricBuilder<com.smartcodeltd.metrics.timestamped.Histogram> HISTOGRAMS = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Histogram>() {
+        MetricBuilder<com.smartcodeltd.statsd.timestamped.Histogram> HISTOGRAMS = new MetricBuilder<com.smartcodeltd.statsd.timestamped.Histogram>() {
             @Override
-            public com.smartcodeltd.metrics.timestamped.Histogram newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Histogram(timestamp, new UniformReservoir());
+            public com.smartcodeltd.statsd.timestamped.Histogram newMetric(Timestamp timestamp) {
+                return new com.smartcodeltd.statsd.timestamped.Histogram(timestamp, new UniformReservoir());
             }
 
             @Override
@@ -262,10 +262,10 @@ public class TimestampingMetricRegistry extends MetricRegistry {
             }
         };
 
-        MetricBuilder<com.smartcodeltd.metrics.timestamped.Meter> METERS = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Meter>() {
+        MetricBuilder<com.smartcodeltd.statsd.timestamped.Meter> METERS = new MetricBuilder<com.smartcodeltd.statsd.timestamped.Meter>() {
             @Override
-            public com.smartcodeltd.metrics.timestamped.Meter newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Meter(timestamp);
+            public com.smartcodeltd.statsd.timestamped.Meter newMetric(Timestamp timestamp) {
+                return new com.smartcodeltd.statsd.timestamped.Meter(timestamp);
             }
 
             @Override
@@ -274,10 +274,10 @@ public class TimestampingMetricRegistry extends MetricRegistry {
             }
         };
 
-        MetricBuilder<com.smartcodeltd.metrics.timestamped.Timer> TIMERS = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Timer>() {
+        MetricBuilder<com.smartcodeltd.statsd.timestamped.Timer> TIMERS = new MetricBuilder<com.smartcodeltd.statsd.timestamped.Timer>() {
             @Override
-            public com.smartcodeltd.metrics.timestamped.Timer newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Timer(timestamp);
+            public com.smartcodeltd.statsd.timestamped.Timer newMetric(Timestamp timestamp) {
+                return new com.smartcodeltd.statsd.timestamped.Timer(timestamp);
             }
 
             @Override

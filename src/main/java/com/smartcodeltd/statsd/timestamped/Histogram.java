@@ -1,27 +1,32 @@
-package com.smartcodeltd.metrics.timestamped;
+package com.smartcodeltd.statsd.timestamped;
 
-import com.smartcodeltd.metrics.Timestamp;
-import com.smartcodeltd.metrics.TimestampedMetric;
+import com.codahale.metrics.Reservoir;
+import com.smartcodeltd.statsd.Timestamp;
+import com.smartcodeltd.statsd.TimestampedMetric;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Meter
-        extends com.codahale.metrics.Meter
+public class Histogram
+        extends com.codahale.metrics.Histogram
         implements TimestampedMetric
 {
-    public Meter(Timestamp timestamp) {
+    public Histogram(Timestamp timestamp, Reservoir reservoir) {
+        super(reservoir);
+
         this.timestamp = timestamp;
     }
 
-    @Override public void mark() {
-        super.mark();
+    @Override public void update(int value) {
+        super.update(value);
         markUpdate();
     }
 
-    @Override public void mark(long n) {
-        super.mark(n);
+
+    @Override public void update(long value) {
+        super.update(value);
         markUpdate();
     }
+
 
     @Override
     public boolean updatedWithin(long period) {

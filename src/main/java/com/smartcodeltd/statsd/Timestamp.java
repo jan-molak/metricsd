@@ -1,4 +1,4 @@
-package com.smartcodeltd.metrics;
+package com.smartcodeltd.statsd;
 
 import java.util.concurrent.atomic.AtomicLong;
 

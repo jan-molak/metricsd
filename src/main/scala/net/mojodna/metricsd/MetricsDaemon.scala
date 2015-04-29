@@ -3,7 +3,7 @@ package net.mojodna.metricsd
 import java.net.InetSocketAddress
 
 import com.codahale.metrics.MetricRegistry
-import com.smartcodeltd.metrics.{TimestampingMetricRegistry, TimestampedMetric}
+import com.smartcodeltd.statsd.TimestampingMetricRegistry
 import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
 import net.mojodna.metricsd.server.{ManagementServer, MetricsServer, Reporters}

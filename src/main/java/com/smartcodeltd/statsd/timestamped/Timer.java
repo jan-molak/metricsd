@@ -1,7 +1,7 @@
-package com.smartcodeltd.metrics.timestamped;
+package com.smartcodeltd.statsd.timestamped;
 
-import com.smartcodeltd.metrics.Timestamp;
-import com.smartcodeltd.metrics.TimestampedMetric;
+import com.smartcodeltd.statsd.Timestamp;
+import com.smartcodeltd.statsd.TimestampedMetric;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;

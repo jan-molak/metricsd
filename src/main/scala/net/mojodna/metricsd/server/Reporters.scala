@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 
 import com.codahale.metrics._
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
-import com.smartcodeltd.metrics.ForgetfulFilter
+import com.smartcodeltd.statsd.ForgetfulFilter
 import com.typesafe.scalalogging.LazyLogging
 
 trait Reporters extends LazyLogging {
