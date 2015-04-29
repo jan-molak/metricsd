@@ -253,7 +253,7 @@ public class TimestampingMetricRegistry extends MetricRegistry {
         MetricBuilder<com.smartcodeltd.metrics.timestamped.Histogram> HISTOGRAMS = new MetricBuilder<com.smartcodeltd.metrics.timestamped.Histogram>() {
             @Override
             public com.smartcodeltd.metrics.timestamped.Histogram newMetric(Timestamp timestamp) {
-                return new com.smartcodeltd.metrics.timestamped.Histogram(timestamp, new ExponentiallyDecayingReservoir());
+                return new com.smartcodeltd.metrics.timestamped.Histogram(timestamp, new UniformReservoir());
             }
 
             @Override
