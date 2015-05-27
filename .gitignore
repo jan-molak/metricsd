@@ -1,6 +1,7 @@
 target
 project/boot
 project/target
+pom.xml.versionsBackup
 dist
 log
 debian/metricsd
